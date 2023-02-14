@@ -1,37 +1,59 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { useState } from 'react';
 import './App.scss';
-import Animal from './Components/jb/Animal';
+import AnimalLi from './Components/008/AnimalLi';
+import Click from './Components/008/Click';
 
-const obj = ['racoon', 'fox'];
-
-// obj.add('racoon');
-
-// obj.add('fox');
+const data = [
+    { id: 1, animal: 'Racoon', color: 'crimson', bold: true },
+    { id: 4, animal: 'Fox', color: 'brown', bold: true },
+    { id: 17, animal: 'Beaver', color: 'skyblue', bold: false },
+    { id: 3, animal: 'Unicorn', color: 'coral', bold: true }
+];
 
 function App() {
 
-    
+    // const stateValue = useState('start value')[0];
+    // const functionToChangeState = useState('start value')[1];
 
-    // const fox = <u>FOX number: {rand(100, 199)}</u>;
+    const [stateValue, functionToChangeState] = useState('start value');
 
-    // const labas = <i>Labas</i>;
+    // stateValue = 'next value';
+    functionToChangeState('next value'); // => stateValue = 'next value'
+
+    const arr = ['red', 'blue'];
+
+    // const red = arr[0];
+    // const blue = arr[1];
+
+    const [red, blue] = arr;
 
 
     return (
-      <div className="App">
-        <header className="App-header">
+        <div className="App">
+            <header className="App-header">
 
-        <h2>{obj}</h2>
+            <Click/>
+
+                <div className="card">
+                    <div className="card-header">
+                        <h2>Animals List</h2>
+                    </div>
+
+                    
+
+                    <ul className="list-group list-group-flush">
+                        {
+                            data.map((a, i) => <AnimalLi key={a.id} animal={a} index={i} />)
+                        }
+                    </ul>
+                </div>
 
 
-        <Animal animalName="Racoon" color="coral" h1Class="blue" />
-        <Animal animalName="Wolf" color="black" h1Class="green" />
-        <Animal animalName="Fox" color="crimson" h1Class="green"/>
-        <Animal animalName="Rabit" color="black" h1Class="yellow"/>
+            </header>
+        </div>
+    );
 
-        </header>
-      </div>
-  );
-  
 }
 
 export default App;
