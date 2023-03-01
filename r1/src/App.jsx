@@ -1,51 +1,89 @@
-import { useEffect } from 'react';
-import { useState } from 'react';
-import './App.scss';
-import Fox from './Components/016/Fox';
-import Home from './Components/016/Home';
-import Menu from './Components/016/Menu';
-import Racoon from './Components/016/Racoon';
+import { useEffect, useState } from 'react';
+import Create from './Components/Dices-Server/Create';
+import List from './Components/Dices-Server/List';
+import './Components/Dices-Server/style.scss';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
+
+const URL = 'http://localhost:3003/dices';
 
 function App() {
 
-    const [page, setPage] = useState('home');
-
-    const [content, setContent] = useState(null);
+    const [lastUpdate, setLastUpdate] = useState(Date.now());
+    const [list, setList] = useState(null);
+    const [createData, setCreateData] = useState(null);
+    const [deleteModal, setDeleteModal] = useState(null);
+    const [deleteData, setDeleteData] = useState(null);
+    const [editModal, setEditModal] = useState(null);
+    const [editData, setEditData] = useState(null);
+    const [messages, setMessages] = useState(null);
 
 
     useEffect(() => {
-        axios.get('http://localhost:3003/api/' + page)
-        .then(res => {
-            setContent(res.data);
-        });
-    }, [page]);
+        axios.get(URL)
+            .then(res => {
+                setList(res.data);
+            });
+    }, [lastUpdate]);
+
+
+
+    useEffect(() => {
+        if (null === createData) {
+            return;
+        }
+        // pazadas
+        const promiseId = uuidv4();
+        setList(d => [...d, { ...createData, promiseId }]);
+
+        // serveris
+        axios.post(URL, { ...createData, promiseId })
+            .then(res => {
+                setList(d => d.map(d => res.data.promiseId === d.promiseId ? { ...d, id: res.data.id, promiseId: null } : { ...d }));
+                console.log(res.data);
+            });
+
+    }, [createData]);
+
+
+    useEffect(() => {
+        if (null === deleteData) {
+            return;
+        }
+        axios.delete(URL + '/' + deleteData.id)
+            .then(res => {
+                console.log(res.data);
+                setLastUpdate(Date.now());
+            });
+
+    }, [deleteData]);
+
 
 
     return (
-        <div className="App">
-            <header className="App-header">
-
-                <Menu setPage={setPage} />
-
-                {
-                    page === 'home' && null !== content ? <Home title={content.title} /> : null
-                }
-
-                {
-                    page === 'fox' && null !== content ? <Fox title={content.title} /> : null
-                }
-
-                {
-                    page === 'racoon' && null !== content ? <Racoon title={content.title} /> : null
-                }
-
-                {
-                    null == content ? <h1>LOADING...</h1> : null
-                }
-
-            </header>
-        </div>
+        <>
+            <div className="dices">
+                <div className="content">
+                    <div className="left">
+                        <Create setCreateData={setCreateData} />
+                    </div>
+                    <div className="right">
+                        <List
+                            list={list}
+                            setDeleteModal={setDeleteModal}
+                            deleteModal={deleteModal}
+                            setDeleteData={setDeleteData}
+                            editModal={editModal}
+                            setEditModal={setEditModal}
+                            setEditData={setEditData}
+                        />
+                    </div>
+                </div>
+            </div>
+            {
+                // messages && <Messages messages={messages} />
+            }
+        </>
     );
 
 }

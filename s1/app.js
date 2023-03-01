@@ -1,52 +1,67 @@
 const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
+
 const app = express();
 const port = 3003;
 
-const menu = `
-<a href="/">home</a>
-<a href="/racoon">racoon</a>
-<a href="/fox">fox</a>
-`;
+app.use(cors());
+
+app.use(
+    express.urlencoded({
+        extended: true,
+    })
+);
+app.use(express.json());
 
 
-// SSR
-app.get('/', (req, res) => {
-    res.send(`
-    ${menu}
-    <h1>Hello Forest!</h1>
-    `);
-});
-
-app.get('/racoon', (req, res) => {
-    res.send(`
-    ${menu}
-    <h1>Hello RACOON!</h1>
-    `);
-});
-
-app.get('/fox', (req, res) => {
-    res.send(`
-    ${menu}
-    <h1>Hello FOX!</h1>
-    `);
-});
 
 // API
-app.get('/api/home', (req, res) => {
-    res.json({ title: 'Hello Forest!' });
+app.get('/dices', (req, res) => {
+    let allData = fs.readFileSync('./data.json', 'utf8');
+    allData = JSON.parse(allData);
+    res.json(allData);
 });
 
-app.get('/api/racoon', (req, res) => {
-    res.json({ title: 'Hello RACOON!' });
+app.post('/dices', (req, res) => {
+    let allData = fs.readFileSync('./data.json', 'utf8');
+    allData = JSON.parse(allData);
+    const id = uuidv4();
+    const data = {
+        number: req.body.number,
+        size: req.body.size,
+        color: req.body.color,
+        id
+    };
+    promiseId = req.body.promiseId
+    allData.push(data);
+    allData = JSON.stringify(allData);
+    fs.writeFileSync('./data.json', allData, 'utf8');
+
+    res.json({
+        message: 'OK',
+        promiseId,
+        id
+    });
 });
 
-app.get('/api/fox', (req, res) => {
-    res.json({ title: 'Hello FOX!' });
+
+app.delete('/dices/:id', (req, res) => {
+    let allData = fs.readFileSync('./data.json', 'utf8');
+    allData = JSON.parse(allData);
+    let deletedData = allData.filter(d => req.params.id !== d.id);
+    deletedData = JSON.stringify(deletedData);
+    fs.writeFileSync('./data.json', deletedData, 'utf8');
+
+    res.json({ message: 'OK' });
 });
+
+
 
 
 
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+    console.log(`Dices is on port number: ${port}`);
 });
