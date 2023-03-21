@@ -8,7 +8,7 @@ function Login() {
     const [name, setName] = useState('');
     const [psw, setPsw] = useState('');
 
-    const {setLogged, setAuthName, setRoute} = useContext(Global);
+    const {setLogged, setAuthName, updateTrees} = useContext(Global);
 
     const login = _ => {
         axios.post('http://localhost:3003/login', { name, psw }, { withCredentials: true })
@@ -18,9 +18,9 @@ function Login() {
                     setName('');
                     setPsw('');
                     setError(null);
-                    setLogged(true);
+                    setLogged(1);
                     setAuthName(res.data.name);
-                    setRoute('home');
+                    updateTrees(Date.now());
                 } else {
                     setError(true);
                 }

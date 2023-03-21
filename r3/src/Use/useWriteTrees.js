@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-const URL = 'http://localhost:3003/numbers';
+const URL = 'http://localhost:3003/trees';
 
 
-export const useWrite = _ => {
+export const useWriteTrees = _ => {
 
     const [response, setResponse] = useState(null);
     const [create, setCreate] = useState(null);
@@ -14,7 +14,7 @@ export const useWrite = _ => {
         if (null === edit) {
             return;
         }
-        axios.put(URL + '/' + edit.action + '/' + edit.id, { number: edit.number }, { withCredentials: true })
+        axios.put(URL + '/' + edit.id, edit, { withCredentials: true })
             .then(res => {
                 setResponse(res.data)
             });

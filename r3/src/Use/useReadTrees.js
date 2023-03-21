@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-const URL = 'http://localhost:3003/numbers';
+const URL = 'http://localhost:3003/trees';
 
 
-export const useRead = _ => {
+export const useReadTrees = _ => {
 
     const [list, setList] = useState(null);
     const [update, setUpdate] = useState(null);
@@ -15,7 +15,6 @@ export const useRead = _ => {
         axios.get(URL, { withCredentials: true })
             .then(res => setList(res.data));
     }, [update]);
-
 
     return [list, setUpdate];
 

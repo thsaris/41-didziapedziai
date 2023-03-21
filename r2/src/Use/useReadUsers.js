@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-const URL = 'http://localhost:3003/numbers';
+const URL = 'http://localhost:3003/users';
 
 
-export const useRead = _ => {
+export const useReadUsers = _ => {
 
     const [list, setList] = useState(null);
     const [update, setUpdate] = useState(null);
