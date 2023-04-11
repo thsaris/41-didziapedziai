@@ -61,6 +61,150 @@ const doAuth = function(req, res, next) {
 
 // app.use(doAuth);
 
+const convertPhoto = (photo) => {
+    let type = 'unknown';
+    let file = null;
+    if (photo === null) {
+        return [type, file];
+    }
+    if (photo.indexOf('data:image/png;base64,') === 0) {
+        type = 'png';
+        file = Buffer.from(photo.replace('data:image/png;base64,', ''), 'base64');
+    } else if (photo.indexOf('data:image/jpeg;base64,') === 0) {
+        type = 'jpg';
+        file = Buffer.from(photo.replace('data:image/jpeg;base64,', ''), 'base64');
+    } else {
+        file = Buffer.from(photo, 'base64');
+    }
+    return [type, file];
+}
+
+const createPhoto = (photo) => {
+    const [type, file] = convertPhoto(photo);
+    if (file === null) {
+        return null
+    }
+    const fileName = uuidv4() + '.' + type;
+    fs.writeFileSync('./public/img/' + fileName, file);
+    return fileName
+}
+
+const deletePhoto = (id) => {
+    const sql = `
+        SELECT photo
+        FROM districts
+        WHERE id = ?
+    `;
+    con.query(sql, [id], (err, result) => {
+        if (err) throw err;
+        if (result[0].photo) {
+            fs.unlinkSync('./public/img/' + result[0].photo);
+        }
+    });
+}
+
+//*************** FRONT OFFICE ********************/
+
+// SELECT column_name(s) FROM table1
+// UNION ALL
+// SELECT column_name(s) FROM table2;
+
+app.get('/common-list', (req, res) => {
+    const sql = `
+        SELECT 'section' AS type, '' AS photo, id, title
+        FROM sections
+        UNION
+        SELECT 'district', photo, id, title
+        FROM districts
+    `;
+    con.query(sql, (err, result) => {
+        if (err) throw err;
+        res.json({ data: result });
+    });
+});
+
+app.get('/comments/:did/:sid', (req, res) => {
+    const sql = `
+        SELECT id, 'district' AS type, title AS data
+        FROM districts
+        WHERE id = ?
+        UNION
+        SELECT id, 'section', title
+        FROM sections
+        WHERE id = ?
+        UNION
+        SELECT id, 'comment', comment
+        FROM comments
+        WHERE section_id = ? AND district_id = ? AND show_it = 1
+    `;
+    con.query(sql, [req.params.did, req.params.sid, req.params.sid, req.params.did], (err, result) => {
+        if (err) throw err;
+        res.json({ data: result });
+    });
+});
+
+app.post('/comments/:did/:sid', (req, res) => {
+    const sql = `
+        INSERT INTO comments (comment, district_id, section_id)
+        VALUES (?, ?, ?)
+    `;
+    con.query(sql, [req.body.text, req.params.did, req.params.sid], (err, result) => {
+        if (err) throw err;
+        res.json({
+            msg: { text: 'Jūsų pasiūlymas priimtas', type: 'info' }
+        });
+    });
+});
+
+//*************** COMMENTS ********************/
+
+app.get('/admin/comments', (req, res) => {
+    const sql = `
+        SELECT c.id, comment, show_it, d.title AS district, s.title AS section
+        FROM comments AS c
+        INNER JOIN districts AS d
+        ON c.district_id = d.id
+        INNER JOIN sections AS s
+        ON c.section_id = s.id
+        ORDER BY c.id DESC
+    `;
+    con.query(sql, (err, result) => {
+        if (err) throw err;
+        res.json({ data: result });
+    });
+});
+
+app.put('/admin/comments-edit/:id', (req, res) => {
+
+    const sql = `
+        UPDATE comments
+        SET show_it = IF(show_it = 1, 0, 1)
+        WHERE id = ?
+    `;
+    params = [req.params.id];
+
+    con.query(sql, params, (err) => {
+        if (err) throw err;
+        res.json({
+            msg: { text: 'Pasiūlymo statusas pakeistas', type: 'info' }
+        });
+    });
+});
+
+app.delete('/admin/comments/:id', (req, res) => {
+
+    const sql = `
+        DELETE FROM comments
+        WHERE id = ?
+    `;
+    con.query(sql, [req.params.id], (err) => {
+        if (err) throw err;
+        res.json({
+            msg: { text: 'Komentaras panaikintas. Nebėra.', type: 'info' }
+        });
+    });
+});
+
 
 //*************** SECTIONS ********************/
 
@@ -128,11 +272,98 @@ app.put('/admin/sections/:id', (req, res) => {
     `;
     params = [req.body.title, req.params.id];
 
-
     con.query(sql, params, (err) => {
         if (err) throw err;
         res.json({
             msg: { text: 'Sritis pakeista', type: 'info' }
+        });
+    });
+});
+
+
+//*************** DISTRICTS ********************/
+
+app.get('/admin/districts', (req, res) => {
+    const sql = `
+        SELECT id, title, photo
+        FROM districts
+        ORDER BY title
+    `;
+    con.query(sql, (err, result) => {
+        if (err) throw err;
+        res.json({ data: result });
+    });
+});
+
+app.get('/admin/districts/:id', (req, res) => {
+    const sql = `
+        SELECT id, title, photo
+        FROM districts
+        WHERE id = ?
+    `;
+    con.query(sql, [req.params.id], (err, result) => {
+        if (err) throw err;
+        res.json({ data: result[0] });
+    });
+});
+
+app.post('/admin/districts', (req, res) => {
+    const sql = `
+        INSERT INTO districts (title, photo)
+        VALUES (?, ?)
+    `;
+    con.query(sql, [req.body.title, createPhoto(req.body.file)], (err) => {
+        if (err) throw err;
+        res.json({
+            msg: { text: 'Naujas rajonas pridėtas', type: 'success' }
+        });
+    });
+});
+
+app.delete('/admin/districts/:id', (req, res) => {
+
+    deletePhoto(req.params.id);
+
+    sql = `
+        DELETE FROM districts
+        WHERE id = ?
+    `;
+
+    con.query(sql, [req.params.id], (err) => {
+        if (err) throw err;
+        res.json({
+            msg: { text: 'Rajonas ištrintas', type: 'info' }
+        });
+    });
+});
+
+
+app.put('/admin/districts/:id', (req, res) => {
+
+    let sql;
+    fileName = createPhoto(req.body.file);
+
+    if (fileName || req.body.delImg) {
+        deletePhoto(req.params.id);
+        sql = `
+            UPDATE districts
+            SET title = ?, photo = ?
+            WHERE id = ?
+        `;
+        params = [req.body.title, fileName, req.params.id];
+    } else {
+        sql = `
+            UPDATE districts
+            SET title = ?
+            WHERE id = ?
+        `;
+        params = [req.body.title, req.params.id];
+    }
+
+    con.query(sql, params, (err) => {
+        if (err) throw err;
+        res.json({
+            msg: { text: 'Rajonas pakeistas', type: 'info' }
         });
     });
 });

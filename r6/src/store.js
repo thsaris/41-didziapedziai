@@ -1,7 +1,8 @@
 import { createContext, useReducer, useState } from 'react';
-import { sectionsCreate, sectionsDelete, sectionsEdit, sectionsList, sectionsShowEdit } from './actions';
+import { addComment, commentDelete, commentShowHide, commentsShowEdit, commonList, districtsCreate, districtsDelete, districtSection, districtsEdit, districtsList, districtsShowEdit, sectionsCreate, sectionsDelete, sectionsEdit, sectionsList, sectionsShowEdit } from './actions';
 import main from './Reducers/main';
 import axios from 'axios';
+import { SHOW_MESSAGE } from './types';
 
 export const actionsList = {
     'sections-list': sectionsList,
@@ -9,9 +10,25 @@ export const actionsList = {
     'sections-delete': sectionsDelete,
     'sections-show-edit': sectionsShowEdit,
     'sections-edit': sectionsEdit,
+    
+    'districts-create': districtsCreate,
+    'districts-list': districtsList,
+    'districts-delete': districtsDelete,
+    'districts-show-edit': districtsShowEdit,
+    'districts-edit': districtsEdit,
+
+    'comments-show-edit': commentsShowEdit,
+    'comment-show-hide': commentShowHide,
+    'comment-delete': commentDelete,
+
+    'common-list': commonList,
+    'district-section' : districtSection,
+    'add-comment': addComment,
+
 }
 
 const url = 'http://localhost:3003/';
+const imgUrl = 'http://localhost:3003/img/';
 
 
 export const Store = createContext();
@@ -36,6 +53,7 @@ export const Provider = (props) => {
             if (action.payload.body) {
                 args.push(action.payload.body);
             }
+            setLoader(true);
             axios[action.payload.method](...args)
                 .then(res => {
                     action = {
@@ -45,6 +63,20 @@ export const Provider = (props) => {
                         }, doDispach
                     }
                     dispach(action);
+                    if(!action.payload.show) {
+                        setLoader(false);
+                    }
+                    
+                })
+                .catch(error => {
+                    const errorAction = {};
+                    errorAction.payload = {
+                        msg: { text: 'ERRRO.', type: 'danger' }
+                    }
+                    errorAction.type = SHOW_MESSAGE;
+                    errorAction.doDispach = doDispach;
+                    dispach(errorAction);
+
                     setLoader(false);
                 })
         }
@@ -66,7 +98,9 @@ export const Provider = (props) => {
             actionsList,
             messages: store.messages,
             loader,
-            start: () => setLoader(true)
+            start: () => setLoader(true),
+
+            imgUrl
         }}>
             {props.children}
         </Store.Provider>

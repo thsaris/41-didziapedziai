@@ -9,12 +9,21 @@ import Home from './Pages/Home';
 import Login from './Pages/Auth/Login';
 
 import Messages from './Componets/Messages';
+import Loader from './Componets/Loader';
+
 
 import SectionsList from './Pages/Sections/List';
 import SectionsCreate from './Pages/Sections/Create';
 import SectionsEdit from './Pages/Sections/Edit';
-import Loader from './Componets/Loader';
 
+import DistrictsList from './Pages/Districts/List';
+import DistrictsCreate from './Pages/Districts/Create';
+import DistrictsEdit from './Pages/Districts/Edit';
+
+import CommentsEdit from './Pages/Comments/List';
+
+import CommonList from './Pages/Front/List';
+import Comments from './Pages/Front/Comments';
 
 
 function App() {
@@ -32,11 +41,21 @@ function App() {
       {(messages && messages.length) ? <Messages messages={messages} /> : null }
 
 
+      {console.log('PAGE:', page)}
+
       {page === 'home' ? <Home /> : null}
       {page === 'sections-create' ? <SectionsCreate /> : null}
       {page === 'sections-list' ? <SectionsList /> : null}
       {page === 'sections-show-edit' ? <SectionsEdit /> : null}
 
+      {page === 'districts-create' ? <DistrictsCreate /> : null}
+      {page === 'districts-list' ? <DistrictsList /> : null}
+      {page === 'districts-show-edit' ? <DistrictsEdit /> : null}
+
+      {page === 'common-list' ? <CommonList /> : null}
+      {page === 'comments' ? <Comments /> : null}
+
+      {page === 'comments-show-edit' ? <CommentsEdit /> : null}
 
       
 
