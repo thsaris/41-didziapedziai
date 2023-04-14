@@ -5,6 +5,7 @@ import { Store } from './store';
 
 import Nav from './Componets/Nav';
 import Home from './Pages/Home';
+import Empty from './Pages/Empty';
 
 import Login from './Pages/Auth/Login';
 
@@ -24,6 +25,8 @@ import CommentsEdit from './Pages/Comments/List';
 
 import CommonList from './Pages/Front/List';
 import Comments from './Pages/Front/Comments';
+import P404 from './Pages/P404';
+
 
 
 function App() {
@@ -43,12 +46,14 @@ function App() {
 
       {console.log('PAGE:', page)}
 
+
+      {page === 'empty' ? <Empty /> : null}
       {page === 'home' ? <Home /> : null}
-      {page === 'sections-create' ? <SectionsCreate /> : null}
+      {page === 'show-sections-create' ? <SectionsCreate /> : null}
       {page === 'sections-list' ? <SectionsList /> : null}
       {page === 'sections-show-edit' ? <SectionsEdit /> : null}
 
-      {page === 'districts-create' ? <DistrictsCreate /> : null}
+      {page === 'show-districts-create' ? <DistrictsCreate /> : null}
       {page === 'districts-list' ? <DistrictsList /> : null}
       {page === 'districts-show-edit' ? <DistrictsEdit /> : null}
 
@@ -60,6 +65,9 @@ function App() {
       
 
       {page === 'login' ? <Login /> : null}
+      {page === '404' ? <P404 /> : null}
+
+
 
     </>
   );

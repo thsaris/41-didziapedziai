@@ -5,7 +5,7 @@ export default function Nav() {
     return (
         <nav className="navbar navbar-expand-sm navbar-light bg-light">
             <div className="container-fluid">
-                <a className="navbar-brand" href="a">Navbar w/ text</a>
+                <a className="navbar-brand" href="a">VPS</a>
                 <div className="navbar-collapse">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         <li className="nav-item">
@@ -22,10 +22,10 @@ export default function Nav() {
                             <Link action="districts-list" className="nav-link">Rajonai</Link>
                         </li>
                         <li className="nav-item">
-                            <Link to="sections-create" className="nav-link">Nauja Sritis</Link>
+                            <Link to="show-sections-create" className="nav-link">Nauja Sritis</Link>
                         </li>
                         <li className="nav-item">
-                            <Link to="districts-create" className="nav-link">Naujas Rajonas</Link>
+                            <Link to="show-districts-create" className="nav-link">Naujas Rajonas</Link>
                         </li>
                         <li className="nav-item">
                             <Link action="comments-show-edit" className="nav-link">Pasiūlymų peržiūra</Link>
